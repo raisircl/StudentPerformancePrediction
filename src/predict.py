@@ -17,7 +17,7 @@ import joblib
 import pandas as pd
 from sklearn.linear_model import LinearRegression
 
-from config import (
+from src.config import (
     FEATURE_COLUMNS,
     MAX_ATTENDANCE,
     MAX_MARKS,

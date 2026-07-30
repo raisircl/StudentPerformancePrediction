@@ -24,9 +24,20 @@ from sklearn.metrics import (
     r2_score,
 )
 
-from config import MODEL_FILE_PATH
-from preprocess import get_preprocessed_data
-from train_model import split_dataset
+try:
+    from src.config import MODEL_FILE_PATH
+except ModuleNotFoundError:
+    from config import MODEL_FILE_PATH
+
+try:
+    from src.preprocess import get_preprocessed_data
+except ModuleNotFoundError:
+    from preprocess import get_preprocessed_data
+
+try:
+    from src.train_model import split_dataset
+except ModuleNotFoundError:
+    from train_model import split_dataset
 
 
 @dataclass(frozen=True)

@@ -17,18 +17,90 @@ from pathlib import Path
 
 import pandas as pd
 
-from config import (
-    DATA_FILE_PATH,
-    FEATURE_COLUMNS,
-    MAX_ATTENDANCE,
-    MAX_MARKS,
-    MAX_STUDY_HOURS,
-    MIN_ATTENDANCE,
-    MIN_MARKS,
-    MIN_STUDY_HOURS,
-    REQUIRED_COLUMNS,
-    TARGET_COLUMN,
-)
+try:
+    from src.config import (
+        DATA_FILE_PATH,
+        FEATURE_COLUMNS,
+        MAX_ATTENDANCE,
+        MAX_MARKS,
+        MAX_STUDY_HOURS,
+        MIN_ATTENDANCE,
+        MIN_MARKS,
+        MIN_STUDY_HOURS,
+        REQUIRED_COLUMNS,
+        TARGET_COLUMN,
+    )
+except ModuleNotFoundError:
+    from config import (
+        DATA_FILE_PATH,
+        FEATURE_COLUMNS,
+        MAX_ATTENDANCE,
+        MAX_MARKS,
+        MAX_STUDY_HOURS,
+        MIN_ATTENDANCE,
+        MIN_MARKS,
+        MIN_STUDY_HOURS,
+        REQUIRED_COLUMNS,
+        TARGET_COLUMN,
+    )
+
+
+COLUMN_NAME_ALIASES = {
+    "attendance": "Attendance",
+    "attendancepercentage": "Attendance",
+    "studyhours": "StudyHours",
+    "dailystudyhours": "StudyHours",
+    "previousmarks": "PreviousMarks",
+    "assignmentmarks": "AssignmentMarks",
+    "internalmarks": "InternalMarks",
+    "finalmarks": "FinalMarks",
+}
+
+
+def _normalize_column_key(column_name: str) -> str:
+    """Create a compact, case-insensitive key for column matching."""
+
+    return "".join(
+        character.lower()
+        for character in str(column_name).strip()
+        if character.isalnum()
+    )
+
+
+def standardize_required_column_names(
+    dataframe: pd.DataFrame,
+) -> pd.DataFrame:
+    """
+    Rename known column-name variants to the project's required names.
+
+    This allows datasets with headers such as Attendance_Percentage,
+    Daily Study Hours, or Final_Marks to be used without changing code.
+    """
+
+    standardized_dataframe = dataframe.copy()
+    renamed_columns: dict[str, str] = {}
+
+    for original_column in standardized_dataframe.columns:
+        normalized_name = _normalize_column_key(original_column)
+        expected_name = COLUMN_NAME_ALIASES.get(normalized_name)
+
+        if not expected_name:
+            continue
+
+        if original_column == expected_name:
+            continue
+
+        if expected_name in standardized_dataframe.columns:
+            continue
+
+        renamed_columns[original_column] = expected_name
+
+    if renamed_columns:
+        standardized_dataframe = standardized_dataframe.rename(
+            columns=renamed_columns
+        )
+
+    return standardized_dataframe
 
 
 def load_dataset(file_path: Path = DATA_FILE_PATH) -> pd.DataFrame:
@@ -255,6 +327,8 @@ def preprocess_dataset(
     """
 
     dataframe = load_dataset(file_path)
+
+    dataframe = standardize_required_column_names(dataframe)
 
     validate_required_columns(dataframe)
 

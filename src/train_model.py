@@ -18,14 +18,27 @@ import pandas as pd
 from sklearn.linear_model import LinearRegression
 from sklearn.model_selection import train_test_split
 
-from config import (
-    MODEL_DIR,
-    MODEL_FILE_PATH,
-    RANDOM_STATE,
-    TEST_SIZE,
-    create_required_directories,
-)
-from preprocess import get_preprocessed_data
+try:
+    from src.config import (
+        MODEL_DIR,
+        MODEL_FILE_PATH,
+        RANDOM_STATE,
+        TEST_SIZE,
+        create_required_directories,
+    )
+except ModuleNotFoundError:
+    from config import (
+        MODEL_DIR,
+        MODEL_FILE_PATH,
+        RANDOM_STATE,
+        TEST_SIZE,
+        create_required_directories,
+    )
+
+try:
+    from src.preprocess import get_preprocessed_data
+except ModuleNotFoundError:
+    from preprocess import get_preprocessed_data
 
 
 def split_dataset(
